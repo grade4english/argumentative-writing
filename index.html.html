@@ -1,0 +1,359 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Homework Essay Coach</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: one column. Essay skeleton on top with empty slots, sticky card tray at the bottom. Tap a card to fill the active slot. */
+:root {
+  --bg: #F1F4F9;
+  --surface: #FFFFFF;
+  --ink: #16233B;
+  --muted: #56627A;
+  --line: #D3DAE7;
+  --rule: #E3E8F1;
+  --accent: #2A58D6;
+  --on-accent: #FFFFFF;
+  --accent-soft: #E4EBFC;
+  --yes: #0B7A64;
+  --yes-soft: #DDF3EC;
+  --no: #B2401D;
+  --no-soft: #FBE7DF;
+  --bad: #B3261E;
+  --bad-soft: #FCE4E1;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1424; --surface: #161F36; --ink: #E7ECF7; --muted: #9DA9C3; --line: #2B3656; --rule: #232D49;
+    --accent: #84A6FF; --on-accent: #0E1424; --accent-soft: #1F2C52;
+    --yes: #4CC9A8; --yes-soft: #12332D; --no: #FF9A78; --no-soft: #3A2019; --bad: #FF8A80; --bad-soft: #3D1B19;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1424; --surface: #161F36; --ink: #E7ECF7; --muted: #9DA9C3; --line: #2B3656; --rule: #232D49;
+  --accent: #84A6FF; --on-accent: #0E1424; --accent-soft: #1F2C52;
+  --yes: #4CC9A8; --yes-soft: #12332D; --no: #FF9A78; --no-soft: #3A2019; --bad: #FF8A80; --bad-soft: #3D1B19;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.5; }
+.wrap { max-width: 44rem; margin: 0 auto; padding-block: 1.25rem 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+h1 { font-size: clamp(1.9rem, 7vw, 2.6rem); font-weight: 800; }
+.top { display: grid; gap: 0.5rem; }
+.lead { color: var(--muted); }
+.step { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; margin-top: 1.2rem; }
+
+.sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.7rem; margin-top: 0.5rem; }
+.side { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 0.8rem 1rem; display: grid; gap: 0.15rem; min-width: 0; }
+.side strong { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; }
+.side span { font-size: 1rem; }
+.side.yes strong { color: var(--yes); }
+.side.no strong { color: var(--no); }
+.side.yes[aria-pressed="true"] { border-color: var(--yes); background: var(--yes-soft); }
+.side.no[aria-pressed="true"] { border-color: var(--no); background: var(--no-soft); }
+.side:hover { border-color: var(--muted); }
+
+.paper { display: grid; gap: 0.9rem; margin-top: 0.6rem; }
+.para { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0.8rem 0.9rem; display: grid; gap: 0.5rem; }
+.para h3 { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-family: var(--font-body); font-weight: 700; }
+.row { display: grid; grid-template-columns: 5.6rem 1fr; gap: 0.6rem; align-items: start; }
+.row.noconn { grid-template-columns: 1fr; }
+.conn { font-weight: 700; padding-top: 0.55rem; color: var(--muted); }
+.slotwrap { min-width: 0; display: grid; gap: 0.25rem; }
+.slot { width: 100%; text-align: left; min-height: 3rem; border-radius: 8px; padding: 0.5rem 0.7rem; border: 2px dashed var(--line); background: var(--bg); color: var(--muted); overflow-wrap: anywhere; }
+.slot.active { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.slot.drag { border-color: var(--accent); background: var(--accent-soft); }
+.slot.filled { border-style: solid; border-color: var(--line); background: var(--surface); color: var(--ink); }
+.slot.filled.ok { border-color: var(--yes); background: var(--yes-soft); }
+.slot.filled.bad { border-color: var(--bad); background: var(--bad-soft); }
+.fb { font-size: 0.9rem; font-weight: 700; }
+.fb.ok { color: var(--yes); }
+.fb.bad { color: var(--bad); }
+@media (max-width: 34rem) { .row { grid-template-columns: 1fr; gap: 0.15rem; } .conn { padding-top: 0; font-size: 0.9rem; } }
+
+.finish { background: var(--yes-soft); border: 2px solid var(--yes); border-radius: 10px; padding: 1rem; display: grid; gap: 0.7rem; margin-top: 0.9rem; }
+.finish h2 { font-size: 1.5rem; color: var(--yes); }
+.finish .text { background: var(--surface); border-radius: 8px; padding: 0.8rem 1rem; display: grid; gap: 0.7rem; }
+.finish .text p { overflow-wrap: anywhere; }
+.btns { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+.tray { position: sticky; bottom: 0; z-index: 5; margin-top: 1rem; background: var(--surface); border: 1px solid var(--line); border-bottom: 0; border-radius: 12px 12px 0 0; box-shadow: 0 -6px 18px rgba(10, 20, 50, 0.12); padding: 0.7rem 0.8rem calc(0.7rem + env(safe-area-inset-bottom, 0px)); display: grid; gap: 0.5rem; }
+.trayhead { display: flex; justify-content: space-between; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+.status { font-weight: 700; font-variant-numeric: tabular-nums; }
+.traytitle { font-weight: 700; color: var(--accent); }
+.trayhint { font-size: 0.92rem; color: var(--muted); }
+.cards { display: grid; gap: 0.45rem; max-height: 34vh; overflow-y: auto; padding: 2px; }
+.pcard { text-align: left; background: var(--accent-soft); border: 1.5px solid transparent; border-radius: 8px; padding: 0.55rem 0.75rem; overflow-wrap: anywhere; }
+.pcard:hover { border-color: var(--accent); }
+.pcard[draggable="true"] { cursor: grab; }
+.btn { background: var(--surface); border: 1.5px solid var(--accent); color: var(--accent); border-radius: 6px; padding: 0.45rem 1rem; font-weight: 700; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn:disabled { background: var(--rule); border-color: var(--line); color: var(--muted); cursor: default; }
+.live { min-height: 1.3rem; font-weight: 700; color: var(--yes); }
+.reset { background: none; border: 0; color: var(--muted); text-decoration: underline; padding: 0; justify-self: start; }
+.foot { padding-block: 1rem 0.5rem; }
+</style>
+
+<main class="wrap">
+  <header class="top">
+    <h1>Homework Essay Coach</h1>
+    <p class="lead">Should students have homework every day? Pick a side, then tap cards to build your essay. No typing needed.</p>
+  </header>
+
+  <h2 class="step">1. Pick your side</h2>
+  <div class="sides" role="group" aria-label="Choose your opinion">
+    <button type="button" class="side yes" data-side="yes" aria-pressed="false"><strong>Yes</strong><span>Students should have homework every day.</span></button>
+    <button type="button" class="side no" data-side="no" aria-pressed="false"><strong>No</strong><span>Students should not have homework every day.</span></button>
+  </div>
+
+  <div id="builder" hidden>
+    <h2 class="step">2. Build your essay</h2>
+    <p class="lead">A box glows blue when it is ready. Tap a card below to place it, or drag it on a computer. Tap a filled box to take its card back.</p>
+    <div class="paper" id="paper"></div>
+    <div class="finish" id="finish" hidden></div>
+    <div class="tray" id="tray">
+      <div class="trayhead"><p class="status" id="status" aria-live="polite"></p><button type="button" class="btn primary" id="check" disabled>Check my essay</button></div>
+      <p class="traytitle" id="trayTitle"></p>
+      <p class="trayhint" id="trayHint"></p>
+      <div class="cards" id="cards"></div>
+    </div>
+  </div>
+  <div class="foot"><button type="button" class="reset" id="reset">Start over</button></div>
+</main>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var KEY = 'homework-essay-coach-pp-v1';
+  var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  var lc = function (t) { return /^I[ ']/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1); };
+
+  var IDEAS = {
+    yes: [
+      { id: 'y1', key: 'remembering', r: 'Homework helps students remember what they learned.', e: 'If I practice my spelling words at home, I remember them better on the test.' },
+      { id: 'y2', key: 'being responsible', r: 'Homework teaches students to be responsible.', e: 'When I finish my homework and hand it in on time, I learn to take care of my own work.' },
+      { id: 'y3', key: 'getting ready for tests', r: 'Homework helps students get ready for tests.', e: 'Doing extra math questions at home shows me what I still find difficult before the exam.' },
+      { id: 'y4', key: 'study habits', r: 'Homework builds good study habits for the future.', e: 'If I study for twenty minutes every evening now, high school will feel easier.' }
+    ],
+    no: [
+      { id: 'n1', key: 'resting', r: 'Students need time to rest after a long school day.', e: 'I spend about seven hours at school, so by the evening I am already tired and cannot think clearly.' },
+      { id: 'n2', key: 'family and hobbies', r: 'Students need time for family, sports, and hobbies.', e: 'After school I want to play football, help at home, and spend time with my family.' },
+      { id: 'n3', key: 'stress', r: 'Too much homework causes stress.', e: 'When I have homework in four subjects and a test the next day, I feel worried and cannot sleep well.' },
+      { id: 'n4', key: 'help at home', r: 'Not every student has help at home.', e: 'If I get stuck on a math problem and nobody can explain it, I just feel confused.' }
+    ]
+  };
+
+  var CARD = {};
+  function add(c) { CARD[c.id] = c; }
+  add({ id: 'op-y', type: 'opinion', side: 'yes', text: 'In my opinion, students should have homework every day.' });
+  add({ id: 'op-n', type: 'opinion', side: 'no', text: 'In my opinion, students should not have homework every day.' });
+  ['yes', 'no'].forEach(function (s) {
+    IDEAS[s].forEach(function (i) {
+      add({ id: 'r-' + i.id, type: 'reason', side: s, link: i.id, key: i.key, text: i.r });
+      add({ id: 'x-' + i.id, type: 'example', side: s, link: i.id, key: i.key, text: i.e });
+    });
+  });
+  add({ id: 'ot-y', type: 'other', side: 'yes', text: 'Some people say homework is tiring, but short homework only takes a little time and helps us learn.' });
+  add({ id: 'ot-n', type: 'other', side: 'no', text: 'Some people say homework helps us practice, but we can already practice in class and we need rest at home.' });
+  add({ id: 'ot-w', type: 'other', side: 'weak', text: 'Homework is something that teachers give to students.', hint: 'This only says what homework is. It does not answer the other side.' });
+  add({ id: 'cn-y', type: 'ending', side: 'yes', text: 'In conclusion, homework every day helps students learn, grow, and get ready for the future.' });
+  add({ id: 'cn-n', type: 'ending', side: 'no', text: 'In conclusion, students need rest and free time, so they should not have homework every day.' });
+  add({ id: 'cn-w', type: 'ending', side: 'weak', text: 'That is all I have to say.', hint: 'A conclusion should say your opinion again.' });
+
+  var SLOTS = [
+    { id: 'op', type: 'opinion' },
+    { id: 'r1', type: 'reason', pair: 'e1' }, { id: 'e1', type: 'example', pair: 'r1' },
+    { id: 'r2', type: 'reason', pair: 'e2' }, { id: 'e2', type: 'example', pair: 'r2' },
+    { id: 'r3', type: 'reason', pair: 'e3' }, { id: 'e3', type: 'example', pair: 'r3' },
+    { id: 'ot', type: 'other' }, { id: 'cn', type: 'ending' }
+  ];
+  var SL = {}; SLOTS.forEach(function (s) { SL[s.id] = s; });
+  var PARAS = [
+    { title: 'Introduction', rows: [{ slot: 'op' }] },
+    { title: 'Reason 1', rows: [{ c: 'First,', slot: 'r1' }, { c: 'For example,', slot: 'e1' }] },
+    { title: 'Reason 2', rows: [{ c: 'Second,', slot: 'r2' }, { c: 'For instance,', slot: 'e2' }] },
+    { title: 'Reason 3', rows: [{ c: 'Finally,', slot: 'r3' }, { c: 'For example,', slot: 'e3' }] },
+    { title: 'The other side', rows: [{ slot: 'ot' }] },
+    { title: 'Conclusion', rows: [{ slot: 'cn' }] }
+  ];
+  var TYPE = {
+    opinion: ['Opinion card', 'Pick the sentence that says your opinion.'],
+    reason: ['Reason card', 'Pick a reason that supports your opinion.'],
+    example: ['Example card', 'Pick the example that proves your reason.'],
+    other: ['Other-side card', 'Pick the sentence that answers what the other side says.'],
+    ending: ['Ending card', 'Pick the sentence that ends your essay.']
+  };
+
+  function blank() { return { side: '', placed: {}, checked: {}, active: 'op', msg: '' }; }
+  var S = blank();
+  try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p === 'object') S = Object.assign(blank(), p); } } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ side: S.side, placed: S.placed, checked: S.checked, active: S.active, msg: S.msg })); } catch (e) {} }
+
+  function nextEmpty() { for (var i = 0; i < SLOTS.length; i++) { if (!S.placed[SLOTS[i].id]) return SLOTS[i].id; } return null; }
+  function active() { return S.active && SL[S.active] && !S.placed[S.active] ? S.active : nextEmpty(); }
+  function placedCount() { return SLOTS.filter(function (s) { return S.placed[s.id]; }).length; }
+  function allOk() { return SLOTS.every(function (s) { return S.checked[s.id] === 'ok'; }); }
+
+  function trayCards(type) {
+    var s = S.side, o = s === 'yes' ? 'no' : 'yes', I = IDEAS[s], O = IDEAS[o];
+    var ids;
+    if (type === 'opinion') ids = ['op-y', 'op-n'];
+    else if (type === 'reason') ids = ['r-' + I[0].id, 'r-' + O[0].id, 'r-' + I[1].id, 'r-' + I[2].id, 'r-' + O[1].id, 'r-' + I[3].id];
+    else if (type === 'example') ids = ['x-' + I[2].id, 'x-' + I[0].id, 'x-' + O[0].id, 'x-' + I[3].id, 'x-' + I[1].id];
+    else if (type === 'other') ids = ['ot-w', 'ot-n', 'ot-y'];
+    else ids = ['cn-n', 'cn-w', 'cn-y'];
+    var used = {}; SLOTS.forEach(function (sl) { if (S.placed[sl.id]) used[S.placed[sl.id]] = 1; });
+    return ids.filter(function (id) { return !used[id]; }).map(function (id) { return CARD[id]; });
+  }
+
+  function checkSlot(sl) {
+    var cid = S.placed[sl.id]; if (!cid) return 'Place a card here.';
+    var c = CARD[cid];
+    if (c.side === 'weak') return c.hint;
+    if (c.side !== S.side) return sl.type === 'reason' ? 'This reason supports the other side.' : sl.type === 'example' ? 'This example is for the other side.' : 'This sentence is for the other side.';
+    if (sl.type === 'example') {
+      var rc = CARD[S.placed[sl.pair]];
+      if (!rc) return 'Place a reason in the box above first.';
+      if (rc.side !== S.side) return 'Fix your reason first.';
+      if (c.link !== rc.link) return 'This example does not match your reason. Look for one about ' + rc.key + '.';
+    }
+    return 'ok';
+  }
+
+  function forget(slotId) { delete S.checked[slotId]; var p = SL[slotId].pair; if (p) delete S.checked[p]; S.msg = ''; }
+  function place(slotId, cardId) {
+    var c = CARD[cardId], sl = SL[slotId];
+    if (!c || !sl) return;
+    if (c.type !== sl.type) { S.msg = 'That card goes in a different box.'; render(); return; }
+    SLOTS.forEach(function (o) { if (S.placed[o.id] === cardId) { delete S.placed[o.id]; forget(o.id); } });
+    S.placed[slotId] = cardId; forget(slotId);
+    S.active = nextEmpty(); render();
+  }
+
+  function essayParts() {
+    var t = function (id) { var c = CARD[S.placed[id]]; return c ? c.text : ''; };
+    return [
+      t('op'),
+      'First, ' + lc(t('r1')) + ' For example, ' + lc(t('e1')),
+      'Second, ' + lc(t('r2')) + ' For instance, ' + lc(t('e2')),
+      'Finally, ' + lc(t('r3')) + ' For example, ' + lc(t('e3')),
+      t('ot'), t('cn')
+    ];
+  }
+
+  function render() {
+    $('#builder').hidden = !S.side;
+    Array.prototype.forEach.call(document.querySelectorAll('.side'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-side') === S.side)); });
+    if (!S.side) { save(); return; }
+    var act = active();
+    $('#paper').innerHTML = PARAS.map(function (p) {
+      return '<div class="para"><h3>' + p.title + '</h3>' + p.rows.map(function (r) {
+        var sl = SL[r.slot], cid = S.placed[r.slot], c = cid && CARD[cid], st = S.checked[r.slot];
+        var text = c ? (sl.type === 'reason' || sl.type === 'example' ? lc(c.text) : c.text) : '';
+        var cls = 'slot' + (c ? ' filled' : '') + (c && st ? (st === 'ok' ? ' ok' : ' bad') : '') + (act === r.slot ? ' active' : '');
+        var label = c ? esc(text) : (act === r.slot ? 'Pick a card below' : 'Tap here to fill this box');
+        return '<div class="row' + (r.c ? '' : ' noconn') + '">' + (r.c ? '<span class="conn">' + r.c + '</span>' : '') +
+          '<div class="slotwrap"><button type="button" class="' + cls + '" data-slot="' + r.slot + '" aria-label="' + esc((r.c ? r.c + ' ' : '') + (c ? text : TYPE[sl.type][0] + ', empty')) + '">' + label + '</button>' +
+          (c && st ? '<p class="fb ' + (st === 'ok' ? 'ok' : 'bad') + '">' + (st === 'ok' ? '✓ Correct' : esc(st)) + '</p>' : '') + '</div></div>';
+      }).join('') + '</div>';
+    }).join('');
+
+    var n = placedCount(), done = allOk();
+    $('#status').textContent = S.msg || (n + ' of 9 placed');
+    $('#check').disabled = n < SLOTS.length;
+    $('#tray').hidden = done;
+    var title = $('#trayTitle'), hint = $('#trayHint'), cards = $('#cards');
+    if (act) {
+      var sl2 = SL[act];
+      title.textContent = TYPE[sl2.type][0] + 's';
+      var hintText = TYPE[sl2.type][1];
+      if (sl2.type === 'example') { var rc = CARD[S.placed[sl2.pair]]; if (rc) hintText = 'Your reason: "' + rc.text + '" Pick the example that proves it.'; }
+      hint.textContent = hintText;
+      cards.innerHTML = trayCards(sl2.type).map(function (c) {
+        return '<button type="button" class="pcard" draggable="true" data-card="' + c.id + '">' + esc(c.text) + '</button>';
+      }).join('');
+    } else {
+      title.textContent = 'All boxes are full';
+      hint.textContent = 'Press "Check my essay". To change a card, tap its box.';
+      cards.innerHTML = '';
+    }
+
+    var fin = $('#finish');
+    fin.hidden = !done;
+    if (done) {
+      fin.innerHTML = '<h2>Great work! Your essay is ready.</h2><div class="text" id="finalEssay">' + essayParts().map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>' +
+        '<p>Read it aloud once. Does it sound right?</p><div class="btns"><button type="button" class="btn primary" id="copy">Copy my essay</button></div><p class="live" id="copylive" aria-live="polite"></p>';
+    }
+    save();
+  }
+
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-side')) {
+      var s = b.getAttribute('data-side');
+      if (s !== S.side) { S = blank(); S.side = s; }
+      render(); return;
+    }
+    if (b.hasAttribute('data-slot')) {
+      var id = b.getAttribute('data-slot');
+      if (S.placed[id]) { delete S.placed[id]; forget(id); }
+      S.active = id; S.msg = ''; render(); return;
+    }
+    if (b.hasAttribute('data-card')) {
+      var a = active();
+      if (!a) { S.msg = 'Tap a filled box to swap its card.'; render(); return; }
+      place(a, b.getAttribute('data-card')); return;
+    }
+    if (b.id === 'check') {
+      var ok = 0;
+      SLOTS.forEach(function (sl) { var r = checkSlot(sl); S.checked[sl.id] = r; if (r === 'ok') ok++; });
+      S.msg = ok === SLOTS.length ? 'All correct!' : ok + ' of 9 correct. Tap a red box to swap its card.';
+      render(); return;
+    }
+    if (b.id === 'copy') {
+      var text = essayParts().join('\n\n');
+      var okf = function () { $('#copylive').textContent = 'Copied. You can paste it now.'; };
+      var fb = function () {
+        var r = document.createRange(); r.selectNodeContents($('#finalEssay')); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        $('#copylive').textContent = 'Your essay is selected. Press Ctrl+C, or tap and hold and choose Copy.';
+      };
+      try { navigator.clipboard.writeText(text).then(okf, fb); } catch (e) { fb(); }
+      return;
+    }
+    if (b.id === 'reset') {
+      if (b.getAttribute('data-armed')) { S = blank(); b.removeAttribute('data-armed'); b.textContent = 'Start over'; render(); }
+      else { b.setAttribute('data-armed', '1'); b.textContent = 'Tap again to erase everything'; setTimeout(function () { b.removeAttribute('data-armed'); b.textContent = 'Start over'; }, 4000); }
+    }
+  });
+
+  document.addEventListener('dragstart', function (ev) {
+    var c = ev.target.closest && ev.target.closest('[data-card]'); if (!c) return;
+    try { ev.dataTransfer.setData('text/plain', c.getAttribute('data-card')); ev.dataTransfer.effectAllowed = 'move'; } catch (e) {}
+  });
+  document.addEventListener('dragover', function (ev) {
+    var s = ev.target.closest && ev.target.closest('[data-slot]');
+    if (s) { ev.preventDefault(); s.classList.add('drag'); }
+  });
+  document.addEventListener('dragleave', function (ev) {
+    var s = ev.target.closest && ev.target.closest('[data-slot]'); if (s) s.classList.remove('drag');
+  });
+  document.addEventListener('drop', function (ev) {
+    var s = ev.target.closest && ev.target.closest('[data-slot]'); if (!s) return;
+    ev.preventDefault();
+    var cid = ''; try { cid = ev.dataTransfer.getData('text/plain'); } catch (e) {}
+    if (cid) place(s.getAttribute('data-slot'), cid);
+  });
+
+  render();
+})();
+</script>
+
+</body></html>
